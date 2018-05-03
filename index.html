@@ -21,11 +21,13 @@ function preload() {
     game.load.image('fondo', 'assets/fondo.png');
     game.load.image('bloc', 'assets/bloc.png');
     game.load.image('barra', 'assets/barra.png');
+		game.load.image('barraProgres', 'assets/barra.png');
     game.load.image('pilota', 'assets/pilota.png');
 		game.load.spritesheet('heart', 'assets/hearts.png', 300, 300, 3);
 
 }
 
+var barraProgres
 var player
 var cursors
 var ball
@@ -83,6 +85,7 @@ function create() {
 function update() {
 
 	progressLevel.text = 'Nivell completat: ' + ((32-blocs.countLiving())/32)*100+'%'
+	barraProgres.width = ((32-blocs.countLiving())/32)*100
 
 
     if (estat != 'acabat'){
@@ -161,6 +164,8 @@ function resetBlocks(){
 
 function resetPlayer(){
     player = game.add.sprite(game.world.width/2-48, game.world.height*0.9, 'barra');
+		barraProgres = game.add.sprite(game.world.width/2-48, game.world.height*0.9+18+5, 'barraProgres');
+		barraProgres.tint = 0xff00ff;
     game.physics.arcade.enable(player);
     player.body.collideWorldBounds = true;
     player.body.immovable = true;
