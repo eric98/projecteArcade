@@ -25,6 +25,10 @@ function preload() {
     game.load.image('pilota', 'assets/pilota.png');
 		game.load.spritesheet('heart', 'assets/hearts.png', 300, 300, 3);
 
+		game.load.audio('nati', ['assets/music/musicaFinal.mp3','assets/music/musicaFinal.ogg'])
+		game.load.audio('waterDrop', ['assets/music/waterDrop1.mp3','assets/music/waterDrop1.ogg'])
+		game.load.audio('bolaRebota', ['assets/music/bolaExplota2.mp3','assets/music/bolaExplota2.ogg'])
+
 }
 
 var barraProgres
@@ -46,6 +50,10 @@ var estat = ''
 var velocity = 250;
 
 var progressBar
+
+var music
+var waterDropSound
+var bolaRebotaSound
 
 
 function create() {
@@ -80,22 +88,34 @@ function create() {
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
+
+		music = game.sound.play('nati')
+		waterDropSound = game.sound.play('waterDrop')
+		bolaRebotaSound = game.sound.play('bolaRebota')
+}
+
+function ballHitBrick() {
+    bolaRebotaSound.play()
 }
 
 function update() {
 
-	progressLevel.text = 'Nivell completat: ' + ((32-blocs.countLiving())/32)*100+'%'
-	barraProgres.width = ((32-blocs.countLiving())/32)*100
+		progressLevel.text = 'Nivell completat: ' + ((32-blocs.countLiving())/32)*100+'%'
+		barraProgres.width = ((32-blocs.countLiving())/32)*100
 
+		if(!music.isPlaying){
+			music.play()
+		}
 
     if (estat != 'acabat'){
 
-        game.physics.arcade.collide(player, ball)
+        //game.physics.arcade.collide(player, ball)
+				game.physics.arcade.collide(player, ball, ballHitBrick)
         game.physics.arcade.collide(ball, blocs, touchBlock, null, this)
+
 
         if (ball.body.y > 540){
             ball.kill()
-
             livesText.text = 'Lives: ' + --lives
 						cors[lives].frame = 2
             resetBall()
@@ -135,6 +155,7 @@ function update() {
     if (blocs.countLiving() == 0){
         player.kill()
         ball.kill()
+				barraProgres.kill()
         newLevel()
     }
 }
@@ -180,6 +201,7 @@ function resetBall(){
 }
 
 function touchBlock (player, bloc) {
+	waterDropSound.play()
     bloc.kill();
     score += 10;
     scoreText.text = 'Score: ' + score;
