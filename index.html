@@ -21,27 +21,25 @@ function preload() {
     game.load.image('fondo', 'assets/fondo.png');
     game.load.image('bloc', 'assets/bloc.png');
     game.load.image('barra', 'assets/barra.png');
-		game.load.image('barraProgres', 'assets/barra.png');
     game.load.image('pilota', 'assets/pilota.png');
-		game.load.spritesheet('heart', 'assets/hearts.png', 300, 300, 3);
 
+
+		//**PROJECTE** loads per al projecte
+		game.load.image('barraProgres', 'assets/barra.png');
+		game.load.spritesheet('heart', 'assets/hearts.png', 300, 300, 3);
 		game.load.audio('nati', ['assets/music/musicaFinal.mp3','assets/music/musicaFinal.ogg'])
 		game.load.audio('waterDrop', ['assets/music/waterDrop1.mp3','assets/music/waterDrop1.ogg'])
-		game.load.audio('bolaRebota', ['assets/music/bolaExplota2.mp3','assets/music/bolaExplota2.ogg'])
+		game.load.audio('bolaExplota', ['assets/music/bolaExplota2.mp3','assets/music/bolaExplota2.ogg'])
 
 }
-
-var barraProgres
 var player
 var cursors
 var ball
 
 var blocs
 var score = -1000
-var lives = 9
 var level = 0
 var livesText
-var scoreText
 var progressLevel
 var levelText
 
@@ -49,11 +47,13 @@ var estat = ''
 
 var velocity = 250;
 
-var progressBar
-
+//**PROJECTE** variables per al projecte
+var lives = 9
+var scoreText
+var barraProgres
 var music
 var waterDropSound
-var bolaRebotaSound
+var bolaExplotaSound
 
 
 function create() {
@@ -64,6 +64,8 @@ function create() {
     //  A simple background for our game
     game.add.sprite(0, 0, 'fondo');
 
+
+		//**PROJECTE** definició de variables per al projecte
     scoreText = game.add.text(16, 8, 'Score: 0', { fontSize: '32px', fill: '#000' });
 		progressLevel = game.add.text(game.world.centerX-128, 8, 'Punts restants: ', { fontSize: '32px', fill: '#000' });
     livesText = game.add.text(688, 8, 'Lives: '+lives, { fontSize: '32px', fill: '#000' });
@@ -73,50 +75,55 @@ function create() {
 
     newLevel()
 
+
+		//**PROJECTE** dibuixa els cors al principi del nivell
 		var scale = 0.1
 		cors = []
-
 		for (var i = 0; i < lives; i++) {
 			cors.push(game.add.sprite(10+(30*i), game.world.height-40, 'heart',0))
 			cors[i].scale.setTo(scale)
 		}
 
-		progressBar = game.add.graphics(0,0);
-		progressBar.beginFill(0xFF3300);
-    progressBar.drawRect(game.world.width/2,game.world.height-40, (32-blocs.countLiving())*10,10);
-    progressBar.endFill();
-
-    //  Our controls.
-    cursors = game.input.keyboard.createCursorKeys();
-
+		//**PROJECTE** afegeixo la música
 		music = game.sound.play('nati')
 		waterDropSound = game.sound.play('waterDrop')
-		bolaRebotaSound = game.sound.play('bolaRebota')
+		bolaExplotaSound = game.sound.play('bolaExplota')
+
+
+
+		//  Our controls.
+    cursors = game.input.keyboard.createCursorKeys();
 }
 
+//**PROJECTE** al tocar una pilota un bloc s'executa el so, sols s'hauria de canviar que s'executi al rebentar una bola en la bala
 function ballHitBrick() {
-    bolaRebotaSound.play()
+    bolaExplotaSound.play()
 }
 
 function update() {
 
 		progressLevel.text = 'Nivell completat: ' + ((32-blocs.countLiving())/32)*100+'%'
+
+		//**PROJECTE** augmenta l'amplada de la barra de progres de nivell, com he dit abans, el 32 seria el nombreTotalPilotesAlNivell, i el blocs.countLiving() serien les pilotesRestantsPerPassarNivell
 		barraProgres.width = ((32-blocs.countLiving())/32)*100
 
+		//**PROJECTE** quan la música de fons ja no s'executi, és tornarà a executar automàticament per fer-ho amb un bucle
 		if(!music.isPlaying){
 			music.play()
 		}
 
     if (estat != 'acabat'){
 
-        //game.physics.arcade.collide(player, ball)
+				//**PROJECTE** al col·lisionar la pilota en el jugador s'executa la funció per al so, sols s'hauria de canviar per a que s'executes quan col·lisionen la bala i la pilota
 				game.physics.arcade.collide(player, ball, ballHitBrick)
+				//**PROJECTE** el mateix que abans pero amb una altra funció per a una altra col·lisió
         game.physics.arcade.collide(ball, blocs, touchBlock, null, this)
 
 
         if (ball.body.y > 540){
             ball.kill()
             livesText.text = 'Lives: ' + --lives
+						//**PROJECTE** llevo una vida amb --lives, i desprès poso el frame d'aquest a buit (    cors[--lives].frame = 2   )
 						cors[lives].frame = 2
             resetBall()
             player.body.x = game.world.width/2-48
@@ -165,6 +172,7 @@ function newLevel(){
     resetBall()
     resetBlocks()
     levelText.text = 'LEVEL ' + ++level;
+		//**PROJECTE** Al pujar de nivell li sumo a la puntuació
     score += 1000
     velocity += 100
     estat = ''
@@ -185,7 +193,9 @@ function resetBlocks(){
 
 function resetPlayer(){
     player = game.add.sprite(game.world.width/2-48, game.world.height*0.9, 'barra');
+		//**PROJECTE** Afegeixo el sprite de la bara de progress al canvas i li assigno a una variable
 		barraProgres = game.add.sprite(game.world.width/2-48, game.world.height*0.9+18+5, 'barraProgres');
+		//**PROJECTE** Defineixo el color de la barra de progres
 		barraProgres.tint = 0xff00ff;
     game.physics.arcade.enable(player);
     player.body.collideWorldBounds = true;
@@ -201,8 +211,10 @@ function resetBall(){
 }
 
 function touchBlock (player, bloc) {
-	waterDropSound.play()
+		//**PROJECTE** S'executa el so (l'havia pensat per a cada vegada que dispare el jugador)
+		waterDropSound.play()
     bloc.kill();
+		//**PROJECTE** Això seria quan petes una pilota (depenent del tamany seria un o un altre, i actualitzo el text per pantalla)
     score += 10;
     scoreText.text = 'Score: ' + score;
 }
